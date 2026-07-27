@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARIJO — Capacitación de Supervisores</title>
+<style>
+    :root {
+        --brand-blue: #0057a5;
+        --brand-gray: #d9d9d9;
+        --bg-dark: #070a0e;
+        --bg-card: #0e1520;
+        --border-color: #213147;
+        --text-main: #f0f6fc;
+        --text-muted: #9ba1a6;
+        --danger: #d6501e;
+        --ok: #3c7a52;
+        --warn: #d9a520;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg-dark);
+        color: var(--text-main);
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        padding: 16px;
+        overflow: hidden;
+    }
+    .stage {
+        width: 100%;
+        max-width: 1200px;
+        height: calc(100vh - 32px);
+    }
+    .screen { display: none; height: 100%; }
+    .screen.active { display: block; }
+
+    .panel {
+        background: var(--bg-card);
+        border: 3px solid var(--brand-blue);
+        border-radius: 16px;
+        padding: clamp(20px, 4vw, 40px);
+        box-shadow: 0 10px 40px rgba(0, 87, 165, 0.35);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    /* PORTADA */
+    #screen-portada .panel { align-items: center; justify-content: center; text-align: center; gap: 18px; }
+    .logo-mark {
+        width: 96px; height: 96px; border-radius: 50%;
+        background: var(--brand-blue); display: flex; align-items: center; justify-content: center;
+        font-size: 2.4rem; font-weight: 900; letter-spacing: -2px; box-shadow: 0 0 30px rgba(0,87,165,0.6);
+    }
+    .portada-title { font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 900; letter-spacing: 1px; }
+    .portada-sub { color: var(--brand-gray); font-size: 1rem; letter-spacing: 1px; text-transform: uppercase; }
+    .btn-primary {
+        margin-top: 16px; background: var(--brand-blue); color: #fff; border: none;
+        padding: 16px 40px; border-radius: 10px; font-size: 1.05rem; font-weight: bold; cursor: pointer;
+        letter-spacing: 0.5px; transition: all .2s;
+    }
+    .btn-primary:hover { box-shadow: 0 0 20px rgba(0,87,165,0.7); transform: translateY(-2px); }
+
+    /* HEADER común */
+    .header-board {
+        display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center;
+        border-bottom: 2px solid var(--border-color); padding-bottom: 16px; margin-bottom: 20px;
+    }
+    .brand-box h1 { font-size: 1.2rem; font-weight: 900; letter-spacing: 2px; }
+    .brand-box span { font-size: 0.78rem; color: var(--brand-gray); letter-spacing: 1.5px; text-transform: uppercase; }
+    .badge-mod {
+        background: var(--brand-blue); color: #fff; padding: 7px 14px; border-radius: 8px;
+        font-weight: bold; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .back-link {
+        font-size: 0.78rem; color: var(--text-muted); background: none; border: 1px solid var(--border-color);
+        padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    }
+    .back-link:hover { border-color: var(--brand-blue); color: var(--text-main); }
+
+    /* MAPA DE MÓDULOS */
+    .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin: auto 0; }
+    .module-card {
+        background: linear-gradient(135deg, #121c2b, #192638); border: 2px solid var(--border-color);
+        border-radius: 12px; padding: 18px; cursor: pointer; transition: all .2s; position: relative;
+    }
+    .module-card:hover:not(.locked) { border-color: var(--brand-blue); transform: translateY(-2px); }
+    .module-card.locked { opacity: 0.45; cursor: not-allowed; }
+    .module-card.done { border-color: var(--ok); }
+    .module-card .num { font-size: 0.72rem; color: var(--brand-gray); letter-spacing: 1px; text-transform: uppercase; }
+    .module-card .name { font-size: 1rem; font-weight: 900; margin: 4px 0 4px; }
+    .module-card .status { font-size: 0.72rem; color: var(--text-muted); }
+    .lock-icon { position: absolute; top: 12px; right: 14px; font-size: 1.1rem; }
+
+    /* PANTALLA TÍTULO DE JUEGO */
+    .title-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 16px; }
+    .game-kicker { font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; color: var(--brand-gray); }
+    .game-name { font-size: clamp(1.3rem, 4vw, 2rem); font-weight: 900; color: #fff; max-width: 640px; }
+    .game-brief {
+        max-width: 560px; color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;
+        border-left: 3px solid var(--brand-blue); padding-left: 14px; text-align: left;
+    }
+    .debrief-q {
+        max-width: 640px; color: var(--text-main); font-size: 1.4rem; font-weight: 600; line-height: 1.6;
+        border-left: 4px solid var(--brand-blue); padding-left: 18px; text-align: left; margin: 4px 0;
+    }
+
+    /* CRONÓMETRO */
+    .timer-bar { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+    .timer-display { font-size: 1.8rem; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--ok); min-width: 90px; text-align: center; }
+    .timer-btn {
+        background: #121c2b; border: 2px solid var(--border-color); color: var(--text-main);
+        padding: 7px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.8rem;
+    }
+    .timer-btn:hover { border-color: var(--brand-blue); }
+
+    /* GRILLA DE CARTAS */
+    .card-category { text-align: center; margin-bottom: 14px; }
+    .card-category span {
+        background: rgba(0,87,165,0.15); border: 1px solid var(--brand-blue); color: var(--brand-gray);
+        font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; padding: 6px 14px; border-radius: 20px;
+    }
+    .memo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .memo-grid.wide { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 10px; }
+    .memo-grid.wide .card { height: 170px; }
+    .memo-grid.wide .card-back {
+        display: block; font-size: 0.76rem; line-height: 1.45; padding: 14px; text-align: left; overflow-y: auto;
+    }
+    .memo-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+    @media (max-width: 900px) { .memo-grid.cols-5 { grid-template-columns: repeat(2, 1fr); } }
+
+    /* Módulo 5: ruleta */
+    .wheel-rule {
+        text-align: center; font-size: 0.82rem; color: var(--brand-gray); background: rgba(0,87,165,0.08);
+        border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; margin-bottom: 10px;
+    }
+    .wheel-controls { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; font-size: 0.82rem; color: var(--text-muted); }
+    .wheel-controls input {
+        width: 60px; background: #121c2b; border: 2px solid var(--border-color); color: var(--text-main);
+        padding: 6px 8px; border-radius: 6px; font-size: 0.85rem; text-align: center;
+    }
+    .wheel-area { display: flex; align-items: center; justify-content: center; gap: 32px; flex-wrap: wrap; margin: auto 0; }
+    .wheel-wrap { position: relative; width: 300px; height: 300px; flex-shrink: 0; }
+    .wheel-pointer {
+        position: absolute; top: -4px; left: 50%; transform: translateX(-50%); z-index: 5;
+        width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent;
+        border-top: 24px solid var(--danger);
+    }
+    .wheel-disc {
+        position: relative; width: 100%; height: 100%; border-radius: 50%; border: 4px solid var(--brand-gray);
+        transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        box-shadow: 0 0 24px rgba(0,87,165,0.5);
+    }
+    .wheel-labels { position: absolute; inset: 0; pointer-events: none; }
+    .wheel-num-label {
+        position: absolute; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 0.95rem; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    }
+    .wheel-side { display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 260px; }
+    .wheel-result { text-align: center; font-size: 0.95rem; color: var(--text-main); min-height: 50px; }
+
+    /* Módulo 6: tablero de perfiles */
+    .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: auto 0; }
+    .profile-card {
+        background: linear-gradient(135deg, #121c2b, #192638); border: 2px solid var(--border-color);
+        border-radius: 12px; padding: 22px 18px; text-align: center;
+    }
+    .profile-card h3 { font-size: 1.1rem; margin-bottom: 10px; color: #fff; }
+    .profile-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
+    .profile-q {
+        font-size: 0.85rem; font-weight: 600; color: var(--brand-gray); border-top: 1px dashed var(--border-color);
+        padding-top: 12px;
+    }
+
+    /* Módulo 8: panel de ideas */
+    .idea-input-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .idea-input-row input {
+        flex: 1; min-width: 200px; background: #121c2b; border: 2px solid var(--border-color); color: var(--text-main);
+        padding: 12px 14px; border-radius: 8px; font-size: 0.9rem;
+    }
+    .idea-input-row input:focus { outline: none; border-color: var(--brand-blue); }
+    .idea-board {
+        flex: 1; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 16px; overflow-y: auto; padding: 10px;
+    }
+    .idea-note {
+        width: 170px; min-height: 120px; border-radius: 4px; padding: 14px 12px 10px; color: #222;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: space-between;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .idea-text { font-size: 0.85rem; line-height: 1.35; font-weight: 600; word-break: break-word; }
+    .idea-vote {
+        align-self: flex-end; background: rgba(0,0,0,0.15); border: none; border-radius: 20px; padding: 4px 10px;
+        font-size: 0.78rem; font-weight: bold; cursor: pointer; color: #222; margin-top: 10px;
+    }
+    .idea-vote:hover { background: rgba(0,0,0,0.28); }
+    .idea-empty { color: var(--text-muted); font-size: 0.85rem; text-align: center; margin: auto; }
+
+    /* Teclado virtual */
+    .vkeyboard { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; flex-shrink: 0; }
+    .vkeyboard.hidden { display: none; }
+    .vkeyboard-row { display: flex; gap: 5px; justify-content: center; }
+    .vkey {
+        flex: 1; min-width: 26px; background: #121c2b; border: 2px solid var(--border-color); color: var(--text-main);
+        border-radius: 7px; padding: 9px 0; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+        text-align: center; user-select: none;
+    }
+    .vkey:active { background: var(--brand-blue); border-color: var(--brand-blue); }
+    .vkey.wide { flex: 2.2; font-size: 0.7rem; }
+    .vkey.space { flex: 6; }
+
+    /* Módulo 9: coaching */
+    .rule-banner {
+        background: repeating-linear-gradient(45deg, var(--border-color) 0 8px, #12202f 8px 16px);
+        border: 2px solid var(--danger); border-radius: 10px; padding: 10px 16px; text-align: center;
+        font-weight: bold; letter-spacing: 1px; text-transform: uppercase; font-size: 0.85rem; color: #fff;
+        margin-bottom: 16px; flex-shrink: 0;
+    }
+    .escape-counter {
+        display: flex; align-items: center; justify-content: center; gap: 12px; margin: 14px 0;
+        font-size: 0.85rem; color: var(--text-muted);
+    }
+    .escape-counter b { color: var(--danger); font-size: 1.1rem; }
+
+    /* Módulo 10: bifurcación */
+    .memo-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 800px) { .memo-grid.cols-3 { grid-template-columns: repeat(2, 1fr); } }
+    .path-tally-row {
+        display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+        margin: 6px 0 4px; font-size: 0.85rem; color: var(--text-muted);
+    }
+    .path-tally-row b { color: var(--text-main); font-size: 1.05rem; }
+
+    /* Módulo 7: orden de prioridad */
+    .slot-row { display: flex; gap: 8px; margin-bottom: 10px; flex-shrink: 0; flex-wrap: wrap; }
+    .slot-box {
+        flex: 1; min-width: 130px; background: rgba(0,87,165,0.06); border: 2px dashed var(--border-color);
+        border-radius: 10px; padding: 10px 6px; min-height: 100px; display: flex; flex-direction: column;
+        align-items: center; text-align: center;
+    }
+    .slot-box.filled { border-style: solid; border-color: var(--ok); background: rgba(60,122,82,0.12); }
+    .slot-label {
+        font-size: 0.72rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;
+        color: var(--brand-gray); margin-bottom: 8px;
+    }
+    .slot-content { font-size: 0.8rem; font-weight: 600; color: var(--text-main); }
+    .slot-placeholder { font-size: 0.72rem; color: var(--text-muted); font-style: italic; }
+    .memo-grid.wide .card-front .icon { font-size: 1.6rem; }
+    .memo-grid.cols-6 { grid-template-columns: repeat(6, 1fr); }
+    @media (max-width: 700px) { .memo-grid.cols-6 { grid-template-columns: repeat(3, 1fr); } }
+
+    /* Módulo 3: clasificación por arrastre */
+    .dragcol-row { display: flex; gap: 12px; margin-bottom: 10px; flex-shrink: 0; }
+    .dragcol {
+        flex: 1; background: rgba(0,87,165,0.06); border: 2px dashed var(--border-color); border-radius: 10px;
+        padding: 10px; min-height: 130px; display: flex; flex-direction: column;
+    }
+    .dragcol-header {
+        font-size: 0.76rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: var(--brand-gray);
+        display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+        border-bottom: 1px solid var(--border-color); padding-bottom: 6px;
+    }
+    .dragcol-header span { background: var(--brand-blue); color: #fff; border-radius: 20px; padding: 1px 8px; font-size: 0.7rem; }
+    .dragcol-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; max-height: 150px; }
+    .drag-chip { background: #121c2b; border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 8px; font-size: 0.68rem; color: var(--text-muted); }
+    .drag-pool {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px;
+        max-height: 190px; min-height: 90px; overflow-y: auto; padding: 4px; flex-shrink: 0;
+    }
+    .drag-card {
+        background: linear-gradient(135deg, #121c2b, #192638); border: 2px solid var(--border-color); border-radius: 8px;
+        padding: 10px 8px; font-size: 0.72rem; text-align: center; cursor: grab; user-select: none; touch-action: none;
+        color: var(--text-main);
+    }
+    .drag-card.dragging { cursor: grabbing; box-shadow: 0 8px 20px rgba(0,0,0,0.5); border-color: var(--brand-blue); opacity: 0.95; }
+    .drag-card.wrong-drop { border-color: var(--danger); animation: shakeCard 0.4s; }
+    @keyframes shakeCard {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-6px); }
+        40% { transform: translateX(6px); }
+        60% { transform: translateX(-4px); }
+        80% { transform: translateX(4px); }
+    }
+    .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 240px)); gap: 12px; justify-content: center; margin-bottom: 8px; }
+    .role-card { perspective: 1000px; height: 90px; cursor: pointer; }
+    .role-card .card-inner { position: relative; width: 100%; height: 100%; transition: transform .5s; transform-style: preserve-3d; }
+    .role-card.flipped .card-inner { transform: rotateY(180deg); }
+    .role-card .card-front {
+        background: linear-gradient(135deg, #121c2b, #192638); border: 2px solid var(--border-color);
+        flex-direction: column; gap: 8px; position: absolute; inset: 0; backface-visibility: hidden; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .role-card .card-front .icon { font-size: 1.8rem; }
+    .role-card .card-back {
+        background: linear-gradient(135deg, #192638, #223349); border: 2px solid var(--brand-blue);
+        transform: rotateY(180deg); position: absolute; inset: 0; backface-visibility: hidden; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900; color: #fff;
+    }
+    .card { perspective: 1000px; height: 150px; cursor: pointer; }
+    .card-inner { position: relative; width: 100%; height: 100%; transition: transform .5s; transform-style: preserve-3d; }
+    .card.flipped .card-inner { transform: rotateY(180deg); }
+    .card-face {
+        position: absolute; inset: 0; backface-visibility: hidden; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center; padding: 12px; text-align: center;
+    }
+    .card-front {
+        background: linear-gradient(135deg, #121c2b, #192638); border: 2px solid var(--border-color);
+        flex-direction: column; gap: 8px;
+    }
+    .card-front .icon { font-size: 1.6rem; }
+    .card-front .lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-front .n { font-size: 0.7rem; color: var(--brand-gray); }
+    .card-back {
+        background: linear-gradient(135deg, #192638, #223349); border: 2px solid var(--brand-blue);
+        transform: rotateY(180deg); font-size: 0.82rem; font-style: italic; line-height: 1.4; color: #fff;
+    }
+
+    .footer-controls {
+        display: flex; justify-content: flex-end; gap: 12px; border-top: 2px solid var(--border-color);
+        padding-top: 18px; margin-top: auto;
+    }
+    .btn-next {
+        background: var(--brand-blue); color: #fff; border: none; padding: 12px 28px; border-radius: 8px;
+        font-weight: bold; font-size: 0.95rem; cursor: pointer; letter-spacing: 0.5px;
+    }
+    .btn-next:hover { box-shadow: 0 0 15px rgba(0,87,165,0.6); }
+    .btn-next.final { background: var(--ok); }
+</style>
+</head>
+<body>
+<div class="stage">
+
+    <!-- PANTALLA 1: PORTADA -->
+    <div class="screen active" id="screen-portada">
+        <div class="panel">
+            <div class="logo-mark">M</div>
+            <div class="portada-title">MARIJO</div>
+            <div class="portada-sub">Capacitación de supervisores</div>
+            <button class="btn-primary" onclick="goTo('mapa')">Empezar a jugar</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 2: MAPA DE MÓDULOS -->
+    <div class="screen" id="screen-mapa">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Mapa de módulos</span></div>
+                <div class="badge-mod" id="progreso-badge">Módulo 1 de 10</div>
+            </div>
+            <div class="module-grid" id="module-grid"></div>
+            <div style="text-align:center; margin-top:16px;">
+                <button class="back-link" onclick="reiniciarTodo()">🔄 Reiniciar taller completo (nuevo grupo)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 1 · JUEGO 1 · TÍTULO -->
+    <div class="screen" id="screen-m1-titulo1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 1 · Comunicación efectiva</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">► El Desafío del Mensaje Asertivo</div>
+                <div class="game-brief">Transforme este reclamo operativo defectuoso en una directiva clara, asertiva y constructiva para el equipo.</div>
+                <button class="btn-primary" onclick="goTo('m1-juego1')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 1 · JUEGO 1 · GRILLA -->
+    <div class="screen" id="screen-m1-juego1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>El Desafío del Mensaje Asertivo</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-1">00:00</div>
+                <button class="timer-btn" onclick="timerStart('1')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('1')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('1')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>💬 Mensaje a Corregir</span></div>
+            <div class="memo-grid" id="grid-juego1"></div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m1-titulo2')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 1 · JUEGO 2 · TÍTULO -->
+    <div class="screen" id="screen-m1-titulo2">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 1 · Comunicación efectiva</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">Simulaciones Operativas: Intervención del Supervisor en Playa</div>
+                <div class="game-brief">Cada carta plantea una situación real de playa. El supervisor interviene frente al grupo resolviéndola en el momento.</div>
+                <button class="btn-primary" onclick="goTo('m1-juego2')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 1 · JUEGO 2 · GRILLA -->
+    <div class="screen" id="screen-m1-juego2">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Simulaciones Operativas</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-2">00:00</div>
+                <button class="timer-btn" onclick="timerStart('2')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('2')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('2')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>⚠️ Simulación Operativa</span></div>
+            <div class="memo-grid" id="grid-juego2"></div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m1-titulo3')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 1 · JUEGO 3 · TÍTULO -->
+    <div class="screen" id="screen-m1-titulo3">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 1 · Comunicación efectiva</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">El Periodista</div>
+                <div class="game-brief">Pasan dos supervisores. Cada uno da vuelta una carta de personaje incógnito para saber su rol: uno queda como Periodista, el otro como Entrevistado. El Periodista elige una pregunta incómoda y se la hace en voz alta; el Entrevistado responde en el momento, como si tuviera que defender la gestión de su propia estación.</div>
+                <button class="btn-primary" onclick="goTo('m1-juego3')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 1 · JUEGO 3 · GRILLA -->
+    <div class="screen" id="screen-m1-juego3">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>El Periodista</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-3">00:00</div>
+                <button class="timer-btn" onclick="timerStart('3')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('3')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('3')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>🕵️ Personaje Incógnito</span></div>
+            <div class="role-grid" id="grid-roles"></div>
+
+            <div style="text-align:center; margin: 6px 0 20px;">
+                <button class="timer-btn" onclick="nuevaPareja()">↺ Nueva pareja</button>
+            </div>
+
+            <div class="card-category"><span>❓ Pregunta</span></div>
+            <div class="memo-grid cols-6" id="grid-juego3"></div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m1-titulo4')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 1 · JUEGO 4 · TÍTULO -->
+    <div class="screen" id="screen-m1-titulo4">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 1 · Comunicación efectiva</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">La Reunión Difícil</div>
+                <div class="game-brief">Dos vendedores enfrentados. El supervisor tiene que mediar. Cada vendedor recibe, en privado y en papel, una instrucción secreta: uno no quiere escuchar razones, el otro exagera todo lo que cuenta. El resto del grupo no sabe qué instrucción tiene cada uno — tiene que descubrirlo mirando la escena.</div>
+                <button class="btn-primary" onclick="goTo('m1-juego4')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 1 · JUEGO 4 · GRILLA -->
+    <div class="screen" id="screen-m1-juego4">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>La Reunión Difícil</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-4">00:00</div>
+                <button class="timer-btn" onclick="timerStart('4')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('4')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('4')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>🕵️ Personaje Incógnito</span></div>
+            <div class="role-grid" id="grid-roles4"></div>
+
+            <div class="card-category"><span>⚡ Conflicto en playa</span></div>
+            <div class="memo-grid wide" id="grid-conflictos"></div>
+
+            <div style="text-align:center; margin: 6px 0 16px;">
+                <button class="timer-btn" onclick="nuevoGrupo()">↺ Nuevo grupo</button>
+            </div>
+
+            <div class="game-brief" style="margin: 0 auto 10px;">📋 Recordatorio para el facilitador: entregá en privado los dos papelitos secretos a los dos vendedores antes de arrancar la escena. El resto del grupo no debe verlos.</div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m1-debrief4')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 1 · JUEGO 4 · CIERRE / DEBATE -->
+    <div class="screen" id="screen-m1-debrief4">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>La Reunión Difícil · Cierre</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Para debatir en grupo</div>
+                <div class="debrief-q">¿Pudieron identificar qué instrucción tenía cada vendedor?</div>
+                <div class="debrief-q">¿Cómo condujo el supervisor la conversación?</div>
+                <div class="debrief-q">¿Qué harían distinto?</div>
+                <button class="btn-next final" onclick="completarModulo(1)">Siguiente nivel →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 2 · JUEGO 1 · TÍTULO -->
+    <div class="screen" id="screen-m2-titulo1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 2 · Feedback</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">Cara a Cara</div>
+                <div class="game-brief">Dos escenas, dos parejas. En una hay que reconocer a un colaborador que trabaja excelente. En la otra hay que corregir a uno con bajo rendimiento. Actúenlo frente al grupo.</div>
+                <button class="btn-primary" onclick="goTo('m2-juego1')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 2 · JUEGO 1 · GRILLA -->
+    <div class="screen" id="screen-m2-juego1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Cara a Cara</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m2">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m2')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m2')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m2')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>🎭 Escena a resolver</span></div>
+            <div class="memo-grid wide" id="grid-m2-juego1"></div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m2-debate')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 2 · DEBATE FINAL -->
+    <div class="screen" id="screen-m2-debate">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Feedback · Cierre</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Para debatir en grupo</div>
+                <div class="debrief-q">¿Por qué cuesta tanto dar feedback?</div>
+                <button class="btn-next final" onclick="completarModulo(2)">Siguiente nivel →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 3 · JUEGO 1 · TÍTULO -->
+    <div class="screen" id="screen-m3-titulo1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 3 · Delegación</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">Cinta Transportadora</div>
+                <div class="game-brief">30 tareas de la estación. Arrastrá cada una a la columna que corresponde: "Las hago yo", "Delego" o "Delego y superviso". Al final se revisa entre todos la clasificación.</div>
+                <button class="btn-primary" onclick="goTo('m3-juego1')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 3 · JUEGO 1 · CLASIFICACIÓN -->
+    <div class="screen" id="screen-m3-juego1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Cinta Transportadora</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m3">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m3')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m3')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m3')">↺ Reiniciar</button>
+            </div>
+
+            <div class="dragcol-row">
+                <div class="dragcol" id="m3-col-propia">
+                    <div class="dragcol-header">Las hago yo <span id="m3-count-propia">0</span></div>
+                    <div class="dragcol-list" id="m3-list-propia"></div>
+                </div>
+                <div class="dragcol" id="m3-col-delego">
+                    <div class="dragcol-header">Delego <span id="m3-count-delego">0</span></div>
+                    <div class="dragcol-list" id="m3-list-delego"></div>
+                </div>
+                <div class="dragcol" id="m3-col-superviso">
+                    <div class="dragcol-header">Delego y superviso <span id="m3-count-superviso">0</span></div>
+                    <div class="dragcol-list" id="m3-list-superviso"></div>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin: 8px 0 6px;">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Sin clasificar: <b id="m3-count-pending">30</b></span>
+                <button class="timer-btn" onclick="resetM3()">↺ Reiniciar clasificación</button>
+            </div>
+            <div class="drag-pool" id="m3-pool"></div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m3-titulo2')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 3 · JUEGO 2 · TÍTULO -->
+    <div class="screen" id="screen-m3-titulo2">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 3 · Delegación</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">El Que Hace Todo</div>
+                <div class="game-brief">Un supervisor que hace absolutamente todo. Un colaborador que se queda esperando instrucciones. Actúen la escena — el grupo tiene que identificar en qué momento debería haber delegado.</div>
+                <button class="btn-primary" onclick="goTo('m3-juego2')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 3 · JUEGO 2 · GRILLA -->
+    <div class="screen" id="screen-m3-juego2">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>El Que Hace Todo</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m3b">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m3b')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m3b')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m3b')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>🎭 Rol a interpretar</span></div>
+            <div class="memo-grid wide" id="grid-m3-juego2"></div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m3-debate')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 3 · DEBATE FINAL -->
+    <div class="screen" id="screen-m3-debate">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Delegación · Cierre</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Para debatir en grupo</div>
+                <div class="debrief-q">¿Por qué creen que muchos líderes no delegan?</div>
+                <button class="btn-next final" onclick="completarModulo(3)">Siguiente nivel →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 4 · JUEGO 1 · TÍTULO -->
+    <div class="screen" id="screen-m4-titulo1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 4 · Resolución de problemas</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">Orden de Servicio</div>
+                <div class="game-brief">5 problemas distintos de la estación, cada uno en su propia carta. Al darla vuelta, aparece el caso y las tres preguntas para analizar entre todos: qué harían primero, qué investigarían, qué decisiones tomarían.</div>
+                <button class="btn-primary" onclick="goTo('m4-juego1')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 4 · JUEGO 1 · GRILLA -->
+    <div class="screen" id="screen-m4-juego1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Orden de Servicio</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m4">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m4')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m4')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m4')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>🛠️ Caso a Resolver</span></div>
+            <div class="memo-grid wide cols-5" id="grid-m4-juego1"></div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m4-titulo2')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 4 · JUEGO 2 · TÍTULO -->
+    <div class="screen" id="screen-m4-titulo2">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 4 · Resolución de problemas</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">Intervención en Playa</div>
+                <div class="game-brief">Dos colaboradores discuten delante de clientes. El supervisor debe intervenir. Asignen los roles con las cartas de Personaje Incógnito y actúen la escena frente al grupo.</div>
+                <button class="btn-primary" onclick="goTo('m4-juego2')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 4 · JUEGO 2 · GRILLA -->
+    <div class="screen" id="screen-m4-juego2">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Intervención en Playa</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m4b">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m4b')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m4b')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m4b')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>🕵️ Personaje Incógnito</span></div>
+            <div class="role-grid" id="grid-roles-m4"></div>
+
+            <div style="text-align:center; margin: 6px 0 16px;">
+                <button class="timer-btn" onclick="nuevoGrupoM4()">↺ Nuevo grupo</button>
+            </div>
+
+            <div class="footer-controls">
+                <button class="btn-next final" onclick="completarModulo(4)">Siguiente nivel →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 5 · JUEGO 1 · TÍTULO -->
+    <div class="screen" id="screen-m5-titulo1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 5 · Liderazgo</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">La Ruleta del Jefe</div>
+                <div class="game-brief">Cada uno ya escribió su respuesta. Se gira la ruleta — si sale tu número, leés en voz alta lo que escribiste.</div>
+                <button class="btn-primary" onclick="goTo('m5-juego1')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 5 · JUEGO 1 · RULETA -->
+    <div class="screen" id="screen-m5-juego1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>La Ruleta del Jefe</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m5">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m5')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m5')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m5')">↺ Reiniciar</button>
+            </div>
+
+            <div class="wheel-controls">
+                <label for="wheel-count">Cantidad de números:</label>
+                <input type="number" id="wheel-count" value="10" min="2" max="20">
+                <button class="timer-btn" onclick="actualizarRuleta()">Actualizar</button>
+            </div>
+
+            <div class="wheel-area">
+                <div class="wheel-wrap">
+                    <div class="wheel-pointer"></div>
+                    <div class="wheel-disc" id="wheel-disc">
+                        <div class="wheel-labels" id="wheel-labels"></div>
+                    </div>
+                </div>
+                <div class="wheel-side">
+                    <button class="btn-primary" onclick="girarRuleta()">🎡 Girar</button>
+                    <div class="wheel-result" id="wheel-result">Girá para elegir quién lee primero.</div>
+                </div>
+            </div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m5-titulo2')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 5 · JUEGO 2 · TÍTULO -->
+    <div class="screen" id="screen-m5-titulo2">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 5 · Liderazgo</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">Equipo Desmotivado</div>
+                <div class="game-brief">Un equipo totalmente desmotivado. ¿Cómo lo levantarían? Asignen los roles con las cartas de Personaje Incógnito y actúen la escena frente al grupo.</div>
+                <button class="btn-primary" onclick="goTo('m5-juego2')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 5 · JUEGO 2 · ROLES -->
+    <div class="screen" id="screen-m5-juego2">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Equipo Desmotivado</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m5b">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m5b')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m5b')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m5b')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>🕵️ Personaje Incógnito</span></div>
+            <div class="role-grid" id="grid-roles-m5"></div>
+
+            <div style="text-align:center; margin: 6px 0 16px;">
+                <button class="timer-btn" onclick="nuevoGrupoM5()">↺ Nuevo grupo</button>
+            </div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m5-debate')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 5 · DEBATE FINAL -->
+    <div class="screen" id="screen-m5-debate">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Liderazgo · Cierre</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Para debatir en grupo</div>
+                <div class="debrief-q">¿Un líder nace o se hace?</div>
+                <button class="btn-next final" onclick="completarModulo(5)">Siguiente nivel →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 6 · JUEGO 1 · TÍTULO -->
+    <div class="screen" id="screen-m6-titulo1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 6 · Gestión de equipos</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">La Alineación</div>
+                <div class="game-brief">Los 4 perfiles de un mismo equipo, a la vista de todos. Cada pareja escribe en su hoja la estrategia para cada uno, y después comparan entre parejas.</div>
+                <button class="btn-primary" onclick="goTo('m6-juego1')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 6 · JUEGO 1 · TABLERO -->
+    <div class="screen" id="screen-m6-juego1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>La Alineación</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m6">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m6')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m6')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m6')">↺ Reiniciar</button>
+            </div>
+
+            <div class="profile-grid">
+                <div class="profile-card">
+                    <h3>Rinde excelente</h3>
+                    <p>Cumple, supera expectativas, no genera problemas.</p>
+                    <div class="profile-q">¿Cómo lo sostenés en el tiempo?</div>
+                </div>
+                <div class="profile-card">
+                    <h3>Cumple</h3>
+                    <p>Hace lo que le toca, sin destacarse ni fallar.</p>
+                    <div class="profile-q">¿Cómo lo llevás a dar un paso más?</div>
+                </div>
+                <div class="profile-card">
+                    <h3>Genera conflictos</h3>
+                    <p>Buen desempeño técnico, pero roza con el resto del equipo.</p>
+                    <div class="profile-q">¿Cómo cortás el patrón sin perderlo?</div>
+                </div>
+                <div class="profile-card">
+                    <h3>No quiere aprender</h3>
+                    <p>Se resiste a cambios de procedimiento o tareas nuevas.</p>
+                    <div class="profile-q">¿Cómo lo acercás sin imponerlo?</div>
+                </div>
+            </div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m6-debate')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 6 · DEBATE FINAL -->
+    <div class="screen" id="screen-m6-debate">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Gestión de equipos · Cierre</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Para desarrollar y debatir</div>
+                <div class="debrief-q">¿Cómo gestionar a este equipo, con estos cuatro perfiles conviviendo juntos?</div>
+                <button class="btn-next final" onclick="completarModulo(6)">Siguiente nivel →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 8 · JUEGO 1 · TÍTULO -->
+    <div class="screen" id="screen-m8-titulo1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 8 · Mejora continua</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">El Panel de Ideas</div>
+                <div class="game-brief">Cada supervisor detecta 5 oportunidades de mejora de su estación que todavía no se estén trabajando. Las agregan al panel tocando "+ Agregar idea", y después votan tocando "Me interesa" en las ideas de los demás.</div>
+                <button class="btn-primary" onclick="goTo('m8-juego1')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 8 · JUEGO 1 · PANEL -->
+    <div class="screen" id="screen-m8-juego1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>El Panel de Ideas</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m8">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m8')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m8')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m8')">↺ Reiniciar</button>
+            </div>
+
+            <div class="idea-input-row">
+                <input type="text" id="idea-input" placeholder="Escribí tu oportunidad de mejora..." onkeypress="if(event.key==='Enter') addIdea()">
+                <button class="btn-primary" style="margin:0; padding:12px 22px; font-size:0.9rem;" onclick="addIdea()">+ Agregar idea</button>
+                <button class="timer-btn" id="kb-toggle-btn" onclick="toggleKeyboard()">⌨️ Ocultar teclado</button>
+                <button class="timer-btn" onclick="resetIdeas()">↺ Vaciar panel</button>
+            </div>
+
+            <div class="vkeyboard" id="vkeyboard"></div>
+
+            <div class="idea-board" id="idea-board"></div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m8-debate')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 8 · DEBATE FINAL -->
+    <div class="screen" id="screen-m8-debate">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Mejora continua · Cierre</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Para cerrar</div>
+                <div class="debrief-q">¿Tenés alguna idea de cómo mejorar estos indicadores? Si es así, contanos.</div>
+                <button class="btn-next final" onclick="completarModulo(8)">Siguiente nivel →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 9 · JUEGO 1 · TÍTULO -->
+    <div class="screen" id="screen-m9-titulo1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 9 · Coaching</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">Solo Preguntas</div>
+                <div class="game-brief">Un colaborador plantea una situación cotidiana. Quien hace de coach solo puede responder con preguntas — nada de consejos directos. Es muchísimo más difícil de lo que parece.</div>
+                <button class="btn-primary" onclick="goTo('m9-juego1')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 9 · JUEGO 1 · GRILLA -->
+    <div class="screen" id="screen-m9-juego1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Solo Preguntas</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="rule-banner">🚫 Prohibido aconsejar — solo se puede resolver haciendo preguntas</div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m9">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m9')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m9')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m9')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>💭 Situación cotidiana</span></div>
+            <div class="memo-grid wide cols-6" id="grid-m9-juego1"></div>
+
+            <div class="escape-counter">
+                <span>Consejos que se escaparon: <b id="escape-count">0</b></span>
+                <button class="timer-btn" onclick="sumarEscape()">+1</button>
+                <button class="timer-btn" onclick="resetEscape()">↺ Reiniciar contador</button>
+            </div>
+
+            <div class="footer-controls">
+                <button class="btn-next final" onclick="completarModulo(9)">Siguiente nivel →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 10 · JUEGO 1 · TÍTULO -->
+    <div class="screen" id="screen-m10-titulo1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 10 · Ética</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">Dilemas Éticos</div>
+                <div class="game-brief">Se lee la situación. ¿Qué harían? Se abre el debate.</div>
+                <button class="btn-primary" onclick="goTo('m10-juego1')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 10 · JUEGO 1 · GRILLA -->
+    <div class="screen" id="screen-m10-juego1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Dilemas Éticos</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m10">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m10')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m10')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m10')">↺ Reiniciar</button>
+            </div>
+
+            <div class="card-category"><span>⚖️ Dilema</span></div>
+            <div class="memo-grid wide cols-3" id="grid-m10-juego1"></div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m10-debate')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 10 · DEBATE FINAL -->
+    <div class="screen" id="screen-m10-debate">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Ética · Cierre</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Debate abierto</div>
+                <div class="debrief-q">¿Cuál de estos dilemas les costó más resolver? ¿Por qué?</div>
+                <button class="btn-next final" onclick="completarModulo(10)">Finalizar taller →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 7 · JUEGO 1 · TÍTULO -->
+    <div class="screen" id="screen-m7-titulo1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Módulo 7 · Planificación</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Nombre del juego táctico</div>
+                <div class="game-name">Hora Pico</div>
+                <div class="game-brief">En una hora aparecen 6 eventos distintos en la estación. Arrastrá cada uno al casillero de prioridad que le corresponde, del 1° (más urgente) al 6° (menos urgente).</div>
+                <button class="btn-primary" onclick="goTo('m7-juego1')">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 7 · JUEGO 1 · ORDEN DE PRIORIDAD -->
+    <div class="screen" id="screen-m7-juego1">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Hora Pico</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+
+            <div class="timer-bar">
+                <div class="timer-display" id="timer-m7">00:00</div>
+                <button class="timer-btn" onclick="timerStart('m7')">▶ Iniciar</button>
+                <button class="timer-btn" onclick="timerPause('m7')">⏸ Pausar</button>
+                <button class="timer-btn" onclick="timerReset('m7')">↺ Reiniciar</button>
+            </div>
+
+            <div class="slot-row" id="m7-slots"></div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin: 10px 0 6px;">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Sin ubicar: <b id="m7-count-pending">6</b></span>
+                <button class="timer-btn" onclick="resetM7()">↺ Reiniciar orden</button>
+            </div>
+            <div class="drag-pool" id="m7-pool"></div>
+
+            <div class="footer-controls">
+                <button class="btn-next" onclick="goTo('m7-debate')">Siguiente →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 7 · DEBATE FINAL -->
+    <div class="screen" id="screen-m7-debate">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span>Planificación · Cierre</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-kicker">Debate</div>
+                <div class="debrief-q">¿Se sorprendieron con el orden? ¿Qué haría que este orden cambie en un día distinto?</div>
+                <button class="btn-next final" onclick="completarModulo(7)">Siguiente nivel →</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" id="screen-en-construccion">
+        <div class="panel">
+            <div class="header-board">
+                <div class="brand-box"><h1>MARIJO</h1><span id="ec-mod-name">Módulo</span></div>
+                <button class="back-link" onclick="goTo('mapa')">← Mapa de módulos</button>
+            </div>
+            <div class="title-screen">
+                <div class="game-name">Este módulo todavía no tiene juego cargado</div>
+                <div class="game-brief">Se agrega en la próxima etapa, siguiendo el mismo formato del Módulo 1.</div>
+                <button class="btn-primary" onclick="goTo('mapa')">Volver al mapa</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* ---------- Navegación entre pantallas ---------- */
+function goTo(screenKey) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + screenKey).classList.add('active');
+    if (screenKey === 'mapa') renderMapa();
+}
+
+/* ---------- Progreso de módulos (persiste en el navegador) ---------- */
+function getUnlocked() {
+    return parseInt(localStorage.getItem('marijo_unlocked') || '1', 10);
+}
+function setUnlocked(n) {
+    localStorage.setItem('marijo_unlocked', String(n));
+}
+function completarModulo(n) {
+    const unlocked = getUnlocked();
+    if (n + 1 > unlocked) setUnlocked(n + 1);
+    goTo('mapa');
+}
+
+const modulos = [
+    { n: 1, name: "Comunicación efectiva", hasContent: true },
+    { n: 2, name: "Feedback", hasContent: true },
+    { n: 3, name: "Delegación", hasContent: true },
+    { n: 4, name: "Resolución de problemas", hasContent: true },
+    { n: 5, name: "Liderazgo", hasContent: true },
+    { n: 6, name: "Gestión de equipos", hasContent: true },
+    { n: 7, name: "Planificación", hasContent: true },
+    { n: 8, name: "Mejora continua", hasContent: true },
+    { n: 9, name: "Coaching", hasContent: true },
+    { n: 10, name: "Ética", hasContent: true },
+];
+
+function renderMapa() {
+    const unlocked = getUnlocked();
+    document.getElementById('progreso-badge').innerText = `Módulo ${Math.min(unlocked, 10)} de 10`;
+    const grid = document.getElementById('module-grid');
+    grid.innerHTML = '';
+    modulos.forEach(m => {
+        const isLocked = m.n > unlocked;
+        const isDone = m.n < unlocked;
+        const card = document.createElement('div');
+        card.className = 'module-card' + (isLocked ? ' locked' : '') + (isDone ? ' done' : '');
+        card.innerHTML = `
+            ${isLocked ? '<span class="lock-icon">🔒</span>' : ''}
+            <div class="num">Módulo ${m.n}</div>
+            <div class="name">${m.name}</div>
+            <div class="status">${isLocked ? 'Bloqueado' : isDone ? 'Completado' : 'Disponible'}</div>
+        `;
+        if (!isLocked) {
+            card.onclick = () => {
+                if (m.n === 1) { goTo('m1-titulo1'); }
+                else if (m.n === 2) { goTo('m2-titulo1'); }
+                else if (m.n === 3) { goTo('m3-titulo1'); }
+                else if (m.n === 4) { goTo('m4-titulo1'); }
+                else if (m.n === 5) { goTo('m5-titulo1'); }
+                else if (m.n === 6) { goTo('m6-titulo1'); }
+                else if (m.n === 7) { goTo('m7-titulo1'); }
+                else if (m.n === 8) { goTo('m8-titulo1'); }
+                else if (m.n === 9) { goTo('m9-titulo1'); }
+                else if (m.n === 10) { goTo('m10-titulo1'); }
+                else {
+                    document.getElementById('ec-mod-name').innerText = `Módulo ${m.n} · ${m.name}`;
+                    goTo('en-construccion');
+                }
+            };
+        }
+        grid.appendChild(card);
+    });
+}
+
+/* ---------- Cronómetros (cuentan para arriba, sin límite) ---------- */
+const timers = {
+    '1': { seconds: 0, interval: null },
+    '2': { seconds: 0, interval: null },
+    '3': { seconds: 0, interval: null },
+    '4': { seconds: 0, interval: null },
+    'm2': { seconds: 0, interval: null },
+    'm3': { seconds: 0, interval: null },
+    'm3b': { seconds: 0, interval: null },
+    'm4': { seconds: 0, interval: null },
+    'm4b': { seconds: 0, interval: null },
+    'm5': { seconds: 0, interval: null },
+    'm5b': { seconds: 0, interval: null },
+    'm6': { seconds: 0, interval: null },
+    'm7': { seconds: 0, interval: null },
+    'm8': { seconds: 0, interval: null },
+    'm9': { seconds: 0, interval: null },
+    'm10': { seconds: 0, interval: null }
+};
+function renderTimer(key) {
+    const s = timers[key].seconds;
+    const m = String(Math.floor(s / 60)).padStart(2, '0');
+    const ss = String(s % 60).padStart(2, '0');
+    document.getElementById('timer-' + key).innerText = `${m}:${ss}`;
+}
+function timerStart(key) {
+    if (timers[key].interval) return;
+    timers[key].interval = setInterval(() => { timers[key].seconds++; renderTimer(key); }, 1000);
+}
+function timerPause(key) { clearInterval(timers[key].interval); timers[key].interval = null; }
+function timerReset(key) { timerPause(key); timers[key].seconds = 0; renderTimer(key); }
+
+/* ---------- Contenido de cartas ---------- */
+const mensajes = [
+    "\"Deciles que limpien, porque está todo sucio\"",
+    "\"Si los clientes se quejan digan que los problemas no son nuestra culpa\"",
+    "\"Más velocidad, atiendan más rápido y dejen de charlar tanto\"",
+    "\"Hicieron todo mal hoy, la estación estaba sucia y las ventas cayeron. Tienen que mejorar la actitud\"",
+    "\"Todos los días un problema distinto con vos\"",
+    "\"Si no te gusta búscate otro trabajo\"",
+    "\"Esto se hace así porque yo lo digo y punto\"",
+    "\"A partir de mañana tienen que vender un 20% más de lubricantes y aditivos, todos tienen que llegar a la meta\"",
+    "\"Cumplan el procedimiento, así no nos retan\"",
+    "\"Hagan el ciclo de servicio completo, por si pasa el cliente incógnito\""
+];
+const escenas = [
+    "El vendedor llega tarde por tercera vez, el supervisor debe conversar con él.",
+    "El vendedor no controla nunca su caja, solo la firma y envía.",
+    "El vendedor no quiere cumplir el procedimiento de firmar los cupones de tarjetas físicas.",
+    "El vendedor ficha ingreso, antes de dejar sus pertenencias en los vestuarios.",
+    "El vendedor contaminó un vehículo y está enojado porque dice que la culpa es del cliente, él le pidió ese combustible.",
+    "El vendedor tiene su teléfono celular en el bolsillo durante su jornada laboral.",
+    "El vendedor está conversando con un amigo, sin reparar que hay clientes sin atender.",
+    "Hay un cliente que se está lavando el vidrio solo, mientras el vendedor observa.",
+    "El baño está sin firmar hace más de una hora.",
+    "El vendedor llega a trabajar en moto sin chaleco y con el casco en la mano.",
+    "¿Qué es peor? (No decir nada / Decirlo mal / Decirlo delante del resto)"
+];
+
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function buildGrid(containerId, items, icon, label) {
+    const grid = document.getElementById(containerId);
+    grid.innerHTML = '';
+    const shuffled = shuffle(items);
+    shuffled.forEach((text, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div class="card-inner">
+                <div class="card-face card-front">
+                    <div class="icon">${icon}</div>
+                    <div class="lbl">${label}</div>
+                </div>
+                <div class="card-face card-back">${text}</div>
+            </div>
+        `;
+        card.onclick = () => card.classList.toggle('flipped');
+        grid.appendChild(card);
+    });
+}
+buildGrid('grid-juego1', mensajes, '💬', 'Mensaje a corregir');
+buildGrid('grid-juego2', escenas, '⚠️', 'Simulación operativa');
+
+/* ---------- Juego 3: El Periodista ---------- */
+const preguntas = [
+    "¿Por qué su estación vende menos?",
+    "¿Por qué perdió clientes?",
+    "¿Por qué tiene tantas diferencias de caja?",
+    "¿Por qué el personal está desmotivado?",
+    "¿Por qué hay tantos reclamos de clientes en su estación?",
+    "¿Por qué su equipo no cumple los procedimientos de seguridad?",
+    "¿Por qué bajaron las ventas de lubricantes este mes?",
+    "¿Por qué renunciaron tantos empleados últimamente?",
+    "¿Por qué tarda tanto en resolver los reclamos de los clientes?",
+    "¿Por qué su estación fue la peor calificada en la última auditoría?",
+    "¿Por qué no delega tareas en su equipo?",
+    "¿Por qué hay tanta rotación de personal en su turno?"
+];
+buildGrid('grid-juego3', preguntas, '❓', 'Pregunta');
+
+let lastRolesOrder = null;
+function buildRoles() {
+    let roles;
+    do {
+        roles = shuffle(['Periodista', 'Entrevistado']);
+    } while (lastRolesOrder && roles[0] === lastRolesOrder[0]);
+    lastRolesOrder = roles;
+
+    const grid = document.getElementById('grid-roles');
+    grid.innerHTML = '';
+    roles.forEach(role => {
+        const card = document.createElement('div');
+        card.className = 'role-card';
+        card.innerHTML = `
+            <div class="card-inner">
+                <div class="card-front"><div class="icon">🕵️</div></div>
+                <div class="card-back">${role}</div>
+            </div>
+        `;
+        card.onclick = () => card.classList.toggle('flipped');
+        grid.appendChild(card);
+    });
+}
+function nuevaPareja() {
+    buildRoles();
+    buildGrid('grid-juego3', preguntas, '❓', 'Pregunta');
+}
+buildRoles();
+
+/* ---------- Juego 4: La Reunión Difícil ---------- */
+const conflictos = [
+    "Turno 3: un vendedor dice que trabajó solo toda la noche e hizo todas las tareas, mientras el otro solo atendió sin ayudarlo. Había muchísimas tareas, faltó plata en la caja y no le habían dejado los insumos — tuvo que improvisar.",
+    "Un vendedor no hace firmar los cupones de tarjeta física porque dice que es pérdida de tiempo: los firma él mismo e inventa los teléfonos. Su compañero está enojado porque después los clientes se enojan con él cuando les pide que firmen.",
+    "Un colaborador se queja de que durante todo el turno solo él limpia los baños, mientras los del sector líquidos no lo ayudan — tienen poco movimiento, mientras que en el gas está muy movido. No lo ayudan ni a atender ni con la limpieza."
+];
+buildGrid('grid-conflictos', conflictos, '⚡', 'Conflicto en playa');
+
+let lastRolesOrder4 = null;
+function buildRoles4() {
+    let roles;
+    do {
+        roles = shuffle(['Supervisor', 'Vendedor 1', 'Vendedor 2']);
+    } while (lastRolesOrder4 && JSON.stringify(roles) === JSON.stringify(lastRolesOrder4));
+    lastRolesOrder4 = roles;
+
+    const grid = document.getElementById('grid-roles4');
+    grid.innerHTML = '';
+    roles.forEach(role => {
+        const card = document.createElement('div');
+        card.className = 'role-card';
+        card.innerHTML = `
+            <div class="card-inner">
+                <div class="card-front"><div class="icon">🕵️</div></div>
+                <div class="card-back">${role}</div>
+            </div>
+        `;
+        card.onclick = () => card.classList.toggle('flipped');
+        grid.appendChild(card);
+    });
+}
+function nuevoGrupo() {
+    buildRoles4();
+    buildGrid('grid-conflictos', conflictos, '⚡', 'Conflicto en playa');
+}
+buildRoles4();
+
+/* ---------- MÓDULO 2: Cara a Cara ---------- */
+const escenasFeedback = [
+    "Un colaborador trabaja excelente. ¿Cómo se lo reconocés?",
+    "Otro colaborador tiene bajo rendimiento. ¿Cómo lo corregís?"
+];
+buildGrid('grid-m2-juego1', escenasFeedback, '🎭', 'Escena a resolver');
+
+/* ---------- MÓDULO 3: Cinta Transportadora ---------- */
+const tareasTexto = [
+    "Varillado de tanques", "Control de calidad y purgado de tanques", "Descarga de camión de combustible",
+    "Recepción de pedido de lubricantes", "Control de humedad en camiones y cisternas", "Auditoría de imagen / seguridad / calidad",
+    "Carpeta de sustentabilidad", "Limpieza de baños", "Limpieza sump raiser", "Limpieza sump dispenser",
+    "Reclamo de un cliente por cobro mal realizado", "Reclamo de cliente por contaminación", "Tareas de mantenimiento de pintura",
+    "Cajero fuera de funcionamiento", "Limpieza de rejillas perimetrales", "Carga a cisternas", "Carga de facturas al sistema Debo",
+    "Control de stock al comenzar la jornada", "Feedback a los colaboradores", "Control de fichaje", "Control de compresor de GNC",
+    "Control de retiro de residuos sustentables", "Control de retiro de residuos peligrosos", "Auditoría de seguridad e higiene",
+    "Mantenimiento SueloCor", "Carga administrativa de remitos de combustible", "Pedido de limpieza", "Pedido de lubricantes",
+    "Asignación de tareas turno 3", "Medidas de seguridad de trabajo en altura"
+];
+const propiaN = [1,2,3,4,6,7,12,14,17,19,20,21,22,23,24,25,26,27,28,29,30];
+const supervisoN = [5,8,9,10,11,13,15,16,18];
+function correctFor(n) {
+    if (propiaN.includes(n)) return 'propia';
+    if (supervisoN.includes(n)) return 'superviso';
+    return 'delego';
+}
+const tareasDelegacion = tareasTexto.map((text, i) => ({ id: 't' + i, text, cat: null, correct: correctFor(i + 1) }));
+
+function renderM3() {
+    const pool = document.getElementById('m3-pool');
+    pool.innerHTML = '';
+    tareasDelegacion.filter(t => !t.cat).forEach(t => {
+        const el = document.createElement('div');
+        el.className = 'drag-card';
+        el.textContent = t.text;
+        attachDragM3(el, t.id);
+        pool.appendChild(el);
+    });
+    ['propia', 'delego', 'superviso'].forEach(cat => {
+        const listEl = document.getElementById('m3-list-' + cat);
+        const items = tareasDelegacion.filter(t => t.cat === cat);
+        listEl.innerHTML = items.map(t => `<div class="drag-chip">${t.text}</div>`).join('');
+        document.getElementById('m3-count-' + cat).innerText = items.length;
+    });
+    document.getElementById('m3-count-pending').innerText = tareasDelegacion.filter(t => !t.cat).length;
+}
+
+function attachDragM3(el, id) {
+    el.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        const rect = el.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        el.setPointerCapture(e.pointerId);
+        el.classList.add('dragging');
+        el.style.position = 'fixed';
+        el.style.width = rect.width + 'px';
+        el.style.left = rect.left + 'px';
+        el.style.top = rect.top + 'px';
+        el.style.zIndex = 999;
+
+        function onMove(ev) {
+            el.style.left = (ev.clientX - offsetX) + 'px';
+            el.style.top = (ev.clientY - offsetY) + 'px';
+        }
+        function onUp(ev) {
+            el.removeEventListener('pointermove', onMove);
+            el.removeEventListener('pointerup', onUp);
+            const dropCat = detectDropZoneM3(ev.clientX, ev.clientY);
+            const task = tareasDelegacion.find(t => t.id === id);
+            if (dropCat && dropCat === task.correct) {
+                task.cat = dropCat;
+                renderM3();
+            } else if (dropCat) {
+                el.classList.remove('dragging');
+                el.classList.add('wrong-drop');
+                setTimeout(() => {
+                    el.classList.remove('wrong-drop');
+                    el.style.position = '';
+                    el.style.left = '';
+                    el.style.top = '';
+                    el.style.width = '';
+                    el.style.zIndex = '';
+                }, 450);
+            } else {
+                el.classList.remove('dragging');
+                el.style.position = '';
+                el.style.left = '';
+                el.style.top = '';
+                el.style.width = '';
+                el.style.zIndex = '';
+            }
+        }
+        el.addEventListener('pointermove', onMove);
+        el.addEventListener('pointerup', onUp);
+    });
+}
+
+function detectDropZoneM3(x, y) {
+    const zones = { propia: 'm3-col-propia', delego: 'm3-col-delego', superviso: 'm3-col-superviso' };
+    for (const cat in zones) {
+        const rect = document.getElementById(zones[cat]).getBoundingClientRect();
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return cat;
+    }
+    return null;
+}
+
+function resetM3() {
+    tareasDelegacion.forEach(t => t.cat = null);
+    renderM3();
+}
+renderM3();
+
+const rolesDelegacion = [
+    "Sos el supervisor: hacés absolutamente todo vos mismo, no delegás nada, controlás cada detalle en persona.",
+    "Sos el colaborador: te quedás esperando instrucciones, sin tomar la iniciativa aunque sepas qué hacer."
+];
+buildGrid('grid-m3-juego2', rolesDelegacion, '🎭', 'Rol a interpretar');
+
+/* ---------- MÓDULO 4: Orden de Servicio ---------- */
+const preguntasAnalisis = "¿Qué harían primero?<br>¿Qué investigarían?<br>¿Qué decisiones tomarían?";
+const casosM4 = [
+    `La estación tiene <b>diferencias de caja</b> recurrentes.<br><br>${preguntasAnalisis}`,
+    `La estación recibe <b>reclamos de clientes</b> en aumento.<br><br>${preguntasAnalisis}`,
+    `La estación tiene <b>falta de stock</b> de productos clave.<br><br>${preguntasAnalisis}`,
+    `La estación tiene <b>mala atención</b> al cliente.<br><br>${preguntasAnalisis}`,
+    `La estación tiene <b>discusiones entre turnos</b>.<br><br>${preguntasAnalisis}`
+];
+buildGrid('grid-m4-juego1', casosM4, '🛠️', 'Caso a resolver');
+
+let lastRolesOrderM4 = null;
+function buildRolesM4() {
+    let roles;
+    do {
+        roles = shuffle(['Supervisor', 'Colaborador 1', 'Colaborador 2']);
+    } while (lastRolesOrderM4 && JSON.stringify(roles) === JSON.stringify(lastRolesOrderM4));
+    lastRolesOrderM4 = roles;
+
+    const grid = document.getElementById('grid-roles-m4');
+    grid.innerHTML = '';
+    roles.forEach(role => {
+        const card = document.createElement('div');
+        card.className = 'role-card';
+        card.innerHTML = `
+            <div class="card-inner">
+                <div class="card-front"><div class="icon">🕵️</div></div>
+                <div class="card-back">${role}</div>
+            </div>
+        `;
+        card.onclick = () => card.classList.toggle('flipped');
+        grid.appendChild(card);
+    });
+}
+function nuevoGrupoM4() { buildRolesM4(); }
+buildRolesM4();
+
+/* ---------- MÓDULO 5: La Ruleta del Jefe ---------- */
+let wheelN = 10;
+let wheelRotation = 0;
+
+function buildWheel(n) {
+    const disc = document.getElementById('wheel-disc');
+    const labelsWrap = document.getElementById('wheel-labels');
+    const segAngle = 360 / n;
+    const colorA = '#0057a5', colorB = '#192638';
+    const stops = [];
+    for (let i = 0; i < n; i++) {
+        stops.push(`${i % 2 === 0 ? colorA : colorB} ${i * segAngle}deg ${(i + 1) * segAngle}deg`);
+    }
+    disc.style.background = `conic-gradient(${stops.join(', ')})`;
+    labelsWrap.innerHTML = '';
+    const radius = 112;
+    for (let i = 0; i < n; i++) {
+        const angleDeg = i * segAngle + segAngle / 2;
+        const theta = angleDeg * Math.PI / 180;
+        const x = radius * Math.sin(theta);
+        const y = -radius * Math.cos(theta);
+        const lbl = document.createElement('div');
+        lbl.className = 'wheel-num-label';
+        lbl.style.left = `calc(50% + ${x}px - 13px)`;
+        lbl.style.top = `calc(50% + ${y}px - 13px)`;
+        lbl.textContent = i + 1;
+        labelsWrap.appendChild(lbl);
+    }
+}
+function actualizarRuleta() {
+    const val = parseInt(document.getElementById('wheel-count').value, 10);
+    wheelN = Math.min(20, Math.max(2, val || 10));
+    document.getElementById('wheel-count').value = wheelN;
+    wheelRotation = 0;
+    document.getElementById('wheel-disc').style.transition = 'none';
+    document.getElementById('wheel-disc').style.transform = 'rotate(0deg)';
+    document.getElementById('wheel-result').innerText = 'Girá para elegir quién lee primero.';
+    buildWheel(wheelN);
+    requestAnimationFrame(() => { document.getElementById('wheel-disc').style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)'; });
+}
+function girarRuleta() {
+    const segAngle = 360 / wheelN;
+    const targetIndex = Math.floor(Math.random() * wheelN);
+    const targetAngle = targetIndex * segAngle + segAngle / 2;
+    const desiredMod = ((-targetAngle) % 360 + 360) % 360;
+    const currentMod = ((wheelRotation % 360) + 360) % 360;
+    let delta = desiredMod - currentMod;
+    if (delta <= 0) delta += 360;
+    wheelRotation += delta + 5 * 360;
+    document.getElementById('wheel-disc').style.transform = `rotate(${wheelRotation}deg)`;
+    document.getElementById('wheel-result').innerText = 'Girando…';
+    setTimeout(() => {
+        const numero = targetIndex + 1;
+        const esImpar = numero % 2 !== 0;
+        const pregunta = esImpar ? '¿Cómo era tu MEJOR jefe?' : '¿Cómo era tu PEOR jefe?';
+        document.getElementById('wheel-result').innerText = `Salió el número ${numero} → ${pregunta}`;
+    }, 4100);
+}
+buildWheel(wheelN);
+
+let lastRolesOrderM5 = null;
+function buildRolesM5() {
+    let roles;
+    do {
+        roles = shuffle(['Líder', 'Colaborador desmotivado']);
+    } while (lastRolesOrderM5 && roles[0] === lastRolesOrderM5[0]);
+    lastRolesOrderM5 = roles;
+
+    const grid = document.getElementById('grid-roles-m5');
+    grid.innerHTML = '';
+    roles.forEach(role => {
+        const card = document.createElement('div');
+        card.className = 'role-card';
+        card.innerHTML = `
+            <div class="card-inner">
+                <div class="card-front"><div class="icon">🕵️</div></div>
+                <div class="card-back">${role}</div>
+            </div>
+        `;
+        card.onclick = () => card.classList.toggle('flipped');
+        grid.appendChild(card);
+    });
+}
+function nuevoGrupoM5() { buildRolesM5(); }
+buildRolesM5();
+
+/* ---------- MÓDULO 8: El Panel de Ideas ---------- */
+const idearColors = ['#F4D35E', '#EE964B', '#A6D854', '#5FA8D3', '#F2A2B4', '#C9A8E6'];
+let ideas = [];
+
+function renderIdeas() {
+    const board = document.getElementById('idea-board');
+    board.innerHTML = '';
+    if (ideas.length === 0) {
+        board.innerHTML = '<div class="idea-empty">Todavía no hay ideas — agreguen la primera.</div>';
+        return;
+    }
+    ideas.forEach((idea, i) => {
+        const note = document.createElement('div');
+        note.className = 'idea-note';
+        const rot = (i % 2 === 0 ? -1 : 1) * (2 + (i % 3));
+        note.style.background = idearColors[i % idearColors.length];
+        note.style.transform = `rotate(${rot}deg)`;
+        note.innerHTML = `
+            <div class="idea-text">${idea.text}</div>
+            <button class="idea-vote" onclick="voteIdea('${idea.id}')">👍 Me interesa <span>${idea.votes}</span></button>
+        `;
+        board.appendChild(note);
+    });
+}
+function addIdea() {
+    const input = document.getElementById('idea-input');
+    const text = input.value.trim();
+    if (!text) return;
+    ideas.push({ id: 'i' + Date.now() + Math.random(), text, votes: 0 });
+    input.value = '';
+    input.focus();
+    renderIdeas();
+}
+function voteIdea(id) {
+    const idea = ideas.find(i => i.id === id);
+    if (idea) { idea.votes++; renderIdeas(); }
+}
+function resetIdeas() {
+    ideas = [];
+    renderIdeas();
+}
+renderIdeas();
+
+/* ---------- Teclado virtual (por si no hay teclado físico conectado) ---------- */
+let kbUpper = false;
+const kbRows = [
+    ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+    ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ñ'],
+    ['z', 'x', 'c', 'v', 'b', 'n', 'm', 'á', 'é', 'í', 'ó', 'ú']
+];
+function renderKeyboard() {
+    const kb = document.getElementById('vkeyboard');
+    kb.innerHTML = '';
+    kbRows.forEach(row => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'vkeyboard-row';
+        row.forEach(ch => {
+            const key = document.createElement('div');
+            key.className = 'vkey';
+            const display = kbUpper ? ch.toUpperCase() : ch;
+            key.textContent = display;
+            key.onclick = () => pressKey(display);
+            rowEl.appendChild(key);
+        });
+        kb.appendChild(rowEl);
+    });
+    const actionRow = document.createElement('div');
+    actionRow.className = 'vkeyboard-row';
+    actionRow.innerHTML = `
+        <div class="vkey wide" onclick="toggleShift()">⇧ Mayús</div>
+        <div class="vkey space" onclick="pressKey(' ')">espacio</div>
+        <div class="vkey wide" onclick="backspaceKey()">⌫ Borrar</div>
+    `;
+    kb.appendChild(actionRow);
+}
+function pressKey(ch) {
+    const input = document.getElementById('idea-input');
+    input.value += ch;
+    input.focus();
+}
+function backspaceKey() {
+    const input = document.getElementById('idea-input');
+    input.value = input.value.slice(0, -1);
+    input.focus();
+}
+function toggleShift() {
+    kbUpper = !kbUpper;
+    renderKeyboard();
+}
+let kbVisible = true;
+function toggleKeyboard() {
+    kbVisible = !kbVisible;
+    document.getElementById('vkeyboard').classList.toggle('hidden', !kbVisible);
+    document.getElementById('kb-toggle-btn').textContent = kbVisible ? '⌨️ Ocultar teclado' : '⌨️ Mostrar teclado';
+}
+renderKeyboard();
+
+/* ---------- MÓDULO 9: Solo Preguntas ---------- */
+const situacionesCoaching = [
+    "Estoy agotado con el turno de fin de semana.",
+    "Un colaborador con buen desempeño te dice que no quiere seguir aprendiendo tareas nuevas.",
+    "Un colaborador te cuenta que otro compañero lo trata mal, pero te pide que no hagas nada.",
+    "Un colaborador llega desmotivado después de un reclamo de un cliente que lo afectó.",
+    "Un colaborador te pregunta directamente qué tiene que hacer para que lo asciendan.",
+    "Un colaborador te dice que se siente estancado haciendo siempre la misma tarea."
+];
+buildGrid('grid-m9-juego1', situacionesCoaching, '💭', 'Situación cotidiana');
+
+let escapeCount = 0;
+function sumarEscape() {
+    escapeCount++;
+    document.getElementById('escape-count').innerText = escapeCount;
+}
+function resetEscape() {
+    escapeCount = 0;
+    document.getElementById('escape-count').innerText = escapeCount;
+}
+
+/* ---------- MÓDULO 10: La Bifurcación ---------- */
+const dilemas = [
+    "Un colaborador muy bueno llega tarde todos los días.<br><br>¿Qué hacés?",
+    "Descubrís que un supervisor amigo tuyo no cumple un procedimiento.<br><br>¿Qué hacés?",
+    "Un colaborador te pide que le firmes una hora que no trabajó, porque tiene un problema personal urgente.<br><br>¿Qué hacés?",
+    "Ves que un compañero se queda con el vuelto de más de un cliente distraído.<br><br>¿Qué hacés?",
+    "Te piden maquillar un indicador para que la estación no quede mal en la auditoría del mes.<br><br>¿Qué hacés?",
+    "Un colaborador te cuenta, en confianza, que otro está robando mercadería.<br><br>¿Qué hacés?"
+];
+buildGrid('grid-m10-juego1', dilemas, '⚖️', 'Dilema');
+
+let tallyA = 0, tallyB = 0;
+function sumarLado(lado) {
+    if (lado === 'a') tallyA++; else tallyB++;
+    document.getElementById('tally-a').innerText = tallyA;
+    document.getElementById('tally-b').innerText = tallyB;
+}
+function resetTally() {
+    tallyA = 0; tallyB = 0;
+    document.getElementById('tally-a').innerText = tallyA;
+    document.getElementById('tally-b').innerText = tallyB;
+}
+
+/* ---------- MÓDULO 7: Hora Pico ---------- */
+const eventosM7 = [
+    { id: 'ev1', text: 'Proveedor', correct: 5, slot: null },
+    { id: 'ev2', text: 'Reclamo', correct: 4, slot: null },
+    { id: 'ev3', text: 'Inspección', correct: 2, slot: null },
+    { id: 'ev4', text: 'Camión', correct: 3, slot: null },
+    { id: 'ev5', text: 'Cliente enojado', correct: 1, slot: null },
+    { id: 'ev6', text: 'Faltante de caja', correct: 6, slot: null }
+];
+
+function renderM7() {
+    const slotsWrap = document.getElementById('m7-slots');
+    slotsWrap.innerHTML = '';
+    for (let i = 1; i <= 6; i++) {
+        const ev = eventosM7.find(e => e.slot === i);
+        const box = document.createElement('div');
+        box.className = 'slot-box' + (ev ? ' filled' : '');
+        box.id = 'm7-slot-' + i;
+        box.innerHTML = `
+            <div class="slot-label">${i}° prioridad</div>
+            ${ev ? `<div class="slot-content">${ev.text}</div>` : '<div class="slot-placeholder">Soltá acá</div>'}
+        `;
+        slotsWrap.appendChild(box);
+    }
+    const pool = document.getElementById('m7-pool');
+    pool.innerHTML = '';
+    eventosM7.filter(e => e.slot === null).forEach(ev => {
+        const el = document.createElement('div');
+        el.className = 'drag-card';
+        el.textContent = ev.text;
+        attachDragM7(el, ev.id);
+        pool.appendChild(el);
+    });
+    document.getElementById('m7-count-pending').innerText = eventosM7.filter(e => e.slot === null).length;
+}
+
+function attachDragM7(el, id) {
+    el.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        const rect = el.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        el.setPointerCapture(e.pointerId);
+        el.classList.add('dragging');
+        el.style.position = 'fixed';
+        el.style.width = rect.width + 'px';
+        el.style.left = rect.left + 'px';
+        el.style.top = rect.top + 'px';
+        el.style.zIndex = 999;
+
+        function onMove(ev) {
+            el.style.left = (ev.clientX - offsetX) + 'px';
+            el.style.top = (ev.clientY - offsetY) + 'px';
+        }
+        function onUp(ev) {
+            el.removeEventListener('pointermove', onMove);
+            el.removeEventListener('pointerup', onUp);
+            const dropSlot = detectDropZoneM7(ev.clientX, ev.clientY);
+            const evento = eventosM7.find(e => e.id === id);
+            if (dropSlot && dropSlot === evento.correct) {
+                evento.slot = dropSlot;
+                renderM7();
+            } else if (dropSlot) {
+                el.classList.remove('dragging');
+                el.classList.add('wrong-drop');
+                setTimeout(() => {
+                    el.classList.remove('wrong-drop');
+                    el.style.position = '';
+                    el.style.left = '';
+                    el.style.top = '';
+                    el.style.width = '';
+                    el.style.zIndex = '';
+                }, 450);
+            } else {
+                el.classList.remove('dragging');
+                el.style.position = '';
+                el.style.left = '';
+                el.style.top = '';
+                el.style.width = '';
+                el.style.zIndex = '';
+            }
+        }
+        el.addEventListener('pointermove', onMove);
+        el.addEventListener('pointerup', onUp);
+    });
+}
+
+function detectDropZoneM7(x, y) {
+    for (let i = 1; i <= 6; i++) {
+        const rect = document.getElementById('m7-slot-' + i).getBoundingClientRect();
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return i;
+    }
+    return null;
+}
+
+function resetM7() {
+    eventosM7.forEach(e => e.slot = null);
+    renderM7();
+}
+renderM7();
+
+/* ---------- Reinicio completo del taller ---------- */
+function reiniciarTodo() {
+    if (!confirm('¿Reiniciar todo el taller? Se vuelve a bloquear todo menos el Módulo 1, y se vacían los juegos con contenido cargado en vivo (ideas, arrastres, etc).')) return;
+
+    setUnlocked(1);
+
+    Object.keys(timers).forEach(key => {
+        clearInterval(timers[key].interval);
+        timers[key].interval = null;
+        timers[key].seconds = 0;
+        const el = document.getElementById('timer-' + key);
+        if (el) el.innerText = '00:00';
+    });
+
+    try { resetM3(); } catch (e) {}
+    try { resetM7(); } catch (e) {}
+    try { ideas = []; renderIdeas(); } catch (e) {}
+    try { escapeCount = 0; document.getElementById('escape-count').innerText = 0; } catch (e) {}
+    try { buildRoles(); } catch (e) {}
+    try { buildRoles4(); } catch (e) {}
+    try { buildRolesM4(); } catch (e) {}
+    try { buildRolesM5(); } catch (e) {}
+    try {
+        wheelRotation = 0;
+        document.getElementById('wheel-disc').style.transform = 'rotate(0deg)';
+        document.getElementById('wheel-result').innerText = 'Girá para elegir quién lee primero.';
+    } catch (e) {}
+
+    goTo('mapa');
+}
+
+renderMapa();
+</script>
+</body>
+</html>
