@@ -1992,6 +1992,17 @@ function reiniciarTodo() {
         document.getElementById('wheel-result').innerText = 'Girá para elegir quién lee primero.';
     } catch (e) {}
 
+    /* Volver a tapar y barajar todas las cartas del sistema */
+    try { buildGrid('grid-juego1', mensajes, '💬', 'Mensaje a corregir'); } catch (e) {}
+    try { buildGrid('grid-juego2', escenas, '⚠️', 'Simulación operativa'); } catch (e) {}
+    try { buildGrid('grid-juego3', preguntas, '❓', 'Pregunta'); } catch (e) {}
+    try { buildGrid('grid-conflictos', conflictos, '⚡', 'Conflicto en playa'); } catch (e) {}
+    try { buildGrid('grid-m2-juego1', escenasFeedback, '🎭', 'Escena a resolver'); } catch (e) {}
+    try { buildGrid('grid-m3-juego2', rolesDelegacion, '🎭', 'Rol a interpretar'); } catch (e) {}
+    try { buildGrid('grid-m4-juego1', casosM4, '🛠️', 'Caso a resolver'); } catch (e) {}
+    try { buildGrid('grid-m9-juego1', situacionesCoaching, '💭', 'Situación cotidiana'); } catch (e) {}
+    try { buildGrid('grid-m10-juego1', dilemas, '⚖️', 'Dilema'); } catch (e) {}
+
     goTo('mapa');
 }
 
@@ -1999,4 +2010,3 @@ renderMapa();
 </script>
 </body>
 </html>
-
